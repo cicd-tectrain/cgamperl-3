@@ -100,6 +100,38 @@ pipeline {
             }
         }
 
+        // ======= Integration Stages =======
+        stage('Build Integration branch') {
+
+            when {
+                branch 'integration'
+                beforeAgent true
+            }
+
+            agent {
+                docker {
+                    image 'gradle:7.5.1-jdk17-focal'
+                }
+            }
+
+            steps {
+                echo 'Building integration...'
+            }
+        }
+
+        stage('Test Integration branch') {
+            steps {
+                echo 'Testing integration...'
+            }
+        }
+
+        stage('Deploy Integration branch') {
+            steps {
+                echo 'Deploying integration...'
+            }
+        }
+
+
     }
 
 
