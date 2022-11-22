@@ -51,6 +51,16 @@ pipeline {
                 // List HTML Test-Report
                 sh 'ls -la build/reports/tests/test'
             }
+
+            // Post-build
+            post {
+                always {
+                    // Collect JUnit test results
+                    junit 'build/test-results/**/*.xml'
+                }
+
+            }
+
         }
 
         stage('Integrating Feature') {
