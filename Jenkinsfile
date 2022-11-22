@@ -184,8 +184,22 @@ pipeline {
         }
 
         stage('Deploy Integration branch') {
+
+            when {
+                branch 'integration'
+                beforeAgent true
+            }
+
             steps {
                 echo 'Deploying integration...'
+
+                // Ist der Docker Daemon erreichbar?
+                sh 'docker info'
+                // -> docker login in Nexus Registry
+
+
+
+
             }
         }
 
