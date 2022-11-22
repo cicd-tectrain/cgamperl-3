@@ -22,6 +22,8 @@ pipeline {
 
             steps {
                 echo 'Building feature'
+                // Cleanup and build proejct (skip tests)
+                sh 'gradle clean build -x test'
             }
         }
 
@@ -33,8 +35,17 @@ pipeline {
                 beforeAgent true
             }
 
+            // Diese Stage in einem Docker-Container ausführen
+            agent {
+                docker {
+                    image 'gradle:7.5.1-jdk17-focal'
+                }
+            }
+
             steps {
                 echo 'Testing feature'
+                // Run test suite
+                sh 'gradle test'
             }
         }
 
