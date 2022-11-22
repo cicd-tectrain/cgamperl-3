@@ -73,6 +73,16 @@ pipeline {
 
             steps {
                 echo 'Integrating feature'
+                sh 'ls -la'
+                sh 'git branch -a'
+                sh 'git checkout feature/feature-1'
+                sh 'git checkout integration'
+                sh 'git merge feature/feature-1'
+                // Push requires credentials
+                withCredentials([
+                    gitUsernamePassword(credentialsId: 'github_cicd_pat', gitToolName: 'Default')
+                ])
+                sh 'git push origin integration'
             }
         }
 
