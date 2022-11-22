@@ -12,7 +12,7 @@ public class CalculatorServiceTest {
     @Test
     void testAdd() {
         int result = service.add(1, 2);
-        assertEquals(3, result);
+        assertEquals(1, result);
     }
 
     @Test
