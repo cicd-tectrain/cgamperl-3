@@ -81,8 +81,10 @@ pipeline {
                 // Push requires credentials
                 withCredentials([
                     gitUsernamePassword(credentialsId: 'github_cicd_pat', gitToolName: 'Default')
-                ])
-                sh 'git push origin integration'
+                ]) {
+                    sh 'git push origin integration'
+                }
+
             }
         }
 
