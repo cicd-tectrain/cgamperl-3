@@ -46,6 +46,10 @@ pipeline {
                 echo 'Testing feature'
                 // Run test suite
                 sh 'gradle test'
+                // List JUnit test files
+                sh 'ls -la build/test-results/test'
+                // List HTML Test-Report
+                sh 'ls -la build/reports/tests/test'
             }
         }
 
