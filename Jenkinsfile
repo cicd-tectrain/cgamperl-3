@@ -4,7 +4,17 @@ pipeline {
 
     agent any
 
+    // Define global Environment
+    environment {
+        INTEGRATION_BRANCH = 'integration'
+    }
+
     stages {
+
+        stage('Log Environment') {
+            echo "Local branch: ${BRANCH_NAME}"
+            echo "Integration branch: ${INTEGRATION_BRANCH}"
+        }
 
         stage('Build Feature') {
             // Run only on feature branches
