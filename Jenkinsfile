@@ -190,19 +190,30 @@ pipeline {
                 beforeAgent true
             }
 
+            environment {
+                NEXUS = credentials('nexus_credentials')
+            }
+
             steps {
                 echo 'Deploying integration...'
 
-                // Ist der Docker Daemon erreichbar?
-                sh 'docker info'
-                // -> docker login in Nexus Registry
+                sh 'ls -la build'
 
+                // Display info about Docker
+                sh 'docker info'
                 sh 'docker compose version'
+                sh 'docker compose config'
 
                 // Build testing image using docker compose
                 sh 'docker compose build testing'
 
+                // Login at Nexus Docker registry
+                sh 'docker login --user $NEXUS_USR --password $NEXUS_PSW nexus:5000'
+
             }
+
+            // Post: Logout Docker
+
         }
 
         stage('Merge integration into master') {
