@@ -12,6 +12,7 @@ pipeline {
 
     stages {
 
+
         stage('Log Environment') {
             steps {
                 echo "Local branch: ${BRANCH_NAME}"
