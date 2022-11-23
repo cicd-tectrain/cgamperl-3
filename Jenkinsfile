@@ -124,7 +124,7 @@ pipeline {
             post {
                 success {
                     // Stash build directory for later use
-                    stash includes: 'build', name: 'build'
+                    stash includes: 'build/', name: 'build'
                 }
             }
         }
