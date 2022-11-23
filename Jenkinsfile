@@ -255,6 +255,143 @@ pipeline {
             }
         }
 
+
+        // ======= Production Stages =======
+
+
+        stage('Build Production') {
+
+            when {
+                branch 'master'
+                beforeAgent true
+            }
+
+            agent {
+                docker {
+                    image 'gradle:7.5.1-jdk17-focal'
+                }
+            }
+
+            steps {
+                echo 'Building production...'
+                sh 'gradle clean build -x test'
+            }
+
+            post {
+                success {
+                    // Stash build directory for later use
+                    stash includes: 'build/', name: 'build-prod'
+                }
+            }
+        }
+
+        stage('Test production') {
+
+            when {
+                branch 'master'
+                beforeAgent true
+            }
+
+            agent {
+                docker {
+                    image 'gradle:7.5.1-jdk17-focal'
+                }
+            }
+
+            steps {
+                echo 'Testing production...'
+                sh 'gradle test'
+            }
+
+            post {
+                always {
+                    junit 'build/test-results/**/*.xml'
+                }
+            }
+
+        }
+
+        stage('Archive production artifacts') {
+
+            when {
+                branch 'master'
+                beforeAgent true
+            }
+
+            agent {
+                docker {
+                    image 'gradle:7.5.1-jdk17-focal'
+                }
+            }
+
+            steps {
+                echo 'Publishing production artifacts...'
+                sh 'ls -la'
+
+                // Upload .jar file to Nexus Maven repository
+                nexusArtifactUploader artifacts: [[
+                    artifactId: 'at.tectrain.cicd',
+                    classifier: '',
+                    file: 'build/libs/demo-0.0.1-SNAPSHOT.jar',
+                    type: 'jar'
+                ]],
+                credentialsId: 'nexus_credentials',
+                groupId: '',
+                nexusUrl: 'nexus:8081/repository/maven-snapshots',
+                nexusVersion: 'nexus3',
+                protocol: 'http',
+                repository: '',
+                version: '0.0.1-SNAPSHOT'
+
+            }
+
+        }
+
+        stage('Deploy Production branch') {
+
+            when {
+                branch 'master'
+                beforeAgent true
+            }
+
+            environment {
+                NEXUS = credentials('nexus_credentials')
+            }
+
+            steps {
+                echo 'Deploying production...'
+
+                // Unstash build directory
+                unstash 'build-prod'
+                sh 'ls -la build'
+
+                // Display info about Docker
+                sh 'docker info'
+                sh 'docker compose version'
+                sh 'docker compose config'
+
+                // Build testing image using docker compose
+                sh 'docker compose build production'
+
+                // Login at Nexus Docker registry
+                sh 'echo $NEXUS_PSW | docker login --username $NEXUS_USR --password-stdin nexus:5000'
+
+                // Push image to registry
+                sh 'docker compose push production'
+
+                // Redeploy testing container
+                sh 'docker compose up -d --force-recreate production'
+            }
+
+            // Post: Logout Docker
+            post {
+                always {
+                    sh 'docker logout nexus:5000'
+                    // Delete /var/jenkins_home/.docker/config.json
+                }
+            }
+        }
+
     }
 
 
