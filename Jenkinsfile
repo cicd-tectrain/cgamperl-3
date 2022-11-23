@@ -120,6 +120,13 @@ pipeline {
                 echo 'Building integration...'
                 sh 'gradle clean build -x test'
             }
+
+            post {
+                success {
+                    // Stash build directory for later use
+                    stash includes: 'build', name: 'build'
+                }
+            }
         }
 
         stage('Test Integration branch') {
@@ -197,6 +204,8 @@ pipeline {
             steps {
                 echo 'Deploying integration...'
 
+                // Unstash build directory
+                unstash 'build'
                 sh 'ls -la build'
 
                 // Display info about Docker
