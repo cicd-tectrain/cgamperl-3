@@ -211,19 +211,23 @@ pipeline {
                 // Display info about Docker
                 sh 'docker info'
                 sh 'docker compose version'
-                sh 'docker compose config'
 
-                // Build testing image using docker compose
-                sh 'docker compose build testing'
+                dir('docker/testing') {
 
-                // Login at Nexus Docker registry
-                sh 'echo $NEXUS_PSW | docker login --username $NEXUS_USR --password-stdin nexus:5000'
+                    sh 'docker compose config'
 
-                // Push image to registry
-                sh 'docker compose push testing'
+                    // Build testing image using docker compose
+                    sh 'docker compose build testing'
 
-                // Redeploy testing container
-                sh 'docker compose up -d --force-recreate testing'
+                    // Login at Nexus Docker registry
+                    sh 'echo $NEXUS_PSW | docker login --username $NEXUS_USR --password-stdin nexus:5000'
+
+                    // Push image to registry
+                    sh 'docker compose push testing'
+
+                    // Redeploy testing container
+                    sh 'docker compose up -d --force-recreate testing'
+                }
             }
 
             // Post: Logout Docker
@@ -368,19 +372,25 @@ pipeline {
                 // Display info about Docker
                 sh 'docker info'
                 sh 'docker compose version'
-                sh 'docker compose config'
 
-                // Build testing image using docker compose
-                sh 'docker compose build production'
+                // Alternativ
+                // sh 'cd docker/production'
 
-                // Login at Nexus Docker registry
-                sh 'echo $NEXUS_PSW | docker login --username $NEXUS_USR --password-stdin nexus:5000'
+                dir('docker/production') {
+                    sh 'docker compose config'
 
-                // Push image to registry
-                sh 'docker compose push production'
+                    // Build testing image using docker compose
+                    sh 'docker compose build production'
 
-                // Redeploy testing container
-                sh 'docker compose up -d --force-recreate production'
+                    // Login at Nexus Docker registry
+                    sh 'echo $NEXUS_PSW | docker login --username $NEXUS_USR --password-stdin nexus:5000'
+
+                    // Push image to registry
+                    sh 'docker compose push production'
+
+                    // Redeploy testing container
+                    sh 'docker compose up -d --force-recreate production'
+                }
             }
 
             // Post: Logout Docker
