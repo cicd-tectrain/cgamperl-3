@@ -197,7 +197,7 @@ pipeline {
                 sh 'docker info'
                 // -> docker login in Nexus Registry
 
-
+                sh 'docker compose version'
 
 
             }
