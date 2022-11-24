@@ -1,5 +1,39 @@
 services:
 
+  jenkins-blueocean:
+    image: myjenkins-blueocean:2.361.4-1
+    build:
+      dockerfile: docker/jenkins/Dockerfile
+      context: .
+    environment:
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_TLS_VERIFY=1
+    networks:
+      - jenkins
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    restart: on-failure
+
+  docker:
+    image: docker:dind
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    networks:
+      - jenkins
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client
+    ports:
+      - "2376:2376"
+
+    command: dockerd-entrypoint.sh --experimental
+
   nexus:
     image: sonatype/nexus3
 
@@ -14,8 +48,9 @@ services:
       - "5000:5000"
 
 volumes:
+  jenkins-data:
+  jenkins-docker-certs:
   nexus-data:
 
 networks:
   jenkins:
-    external: true
